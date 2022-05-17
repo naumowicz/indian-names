@@ -1,51 +1,101 @@
 import './App.css';
 import React, { useEffect, useState } from 'react';
 import Form from './Components/Form';
+import Explanation from './Components/Explanation';
 
-const urlSurname = '';
-const urlMale = '';
-const urlFemale = '';
+const urlSurname = 'https://raw.githubusercontent.com/naumowicz/indian-names/main/data/surnames.csv';
+const urlMale = 'https://raw.githubusercontent.com/naumowicz/indian-names/main/data/male.csv';
+const urlFemale = 'https://raw.githubusercontent.com/naumowicz/indian-names/main/data/female.csv';
+let surnames = [];
+let maleNames = [];
+let femaleNames = [];
 
 function App() {
-	let surnames = [];
-	let maleNames = [];
-	let femaleNames = [];
+	
 	const [isFetchingDone, setFetchingDone] = useState(false);
+	let [displayedName, setDisplayedName] = useState([]);
 
 	useEffect(() => {
-		// setTimeout(() => {
-        //     setFetchingDone(true)
-        // }, 3000);
-		fetchingAllData();
-		setFetchingDone(true);
-	}, [])
+		const getData = async () => {
+			await fetchingAllData();
+			setFetchingDone(true);
+		};
+
+		getData();
+	}, []);
 
 	const fetchDataFromURL = async (url) => {
 		const data = await fetch(url);
 		const text = await data.text();
-		return text.split(',');
+		return text.split('\n');
 	};
 
 	const fetchingAllData = async () => {
-		// surnames = fetchData(urlSurname);
-		// maleNames = fetchData(urlMale);
-		// femaleNames = fetchData(urlFemale);
-		// setFetchingDone(true);
+		surnames = await fetchDataFromURL(urlSurname);
+		maleNames = await fetchDataFromURL(urlMale);
+		femaleNames = await fetchDataFromURL(urlFemale);
 	};
 
-	// const processData = () => {};
-	const callback = (fullName) => {
-		console.log(fullName);
+	const processFullName = (text) => {
+		let results = [];
+
+		text.split(' ').forEach((word) => {
+			const temp = { word: word, type: [] };
+			if (isSurname(word)) {
+				temp.type.push('surname');
+				console.log(temp.type);
+			}
+			if (isMaleName(word)) {
+				temp.type.push('male');
+			}
+			if (isFemaleName(word)) {
+				temp.type.push('female');
+			}
+			results.push(temp);
+		});
+
+		displayedName = results
 	};
 
-	fetchingAllData();
+	const isSurname = (text) => {
+		const result = surnames.findIndex((surname) => {
+			return surname === text;
+		});
+		if (result === -1) {
+			return false;
+		} else {
+			return true;
+		}
+	};
+
+	const isMaleName = (text) => {
+		const result = maleNames.findIndex((maleName) => {
+			return maleName === text;
+		});
+		if (result === -1) {
+			return false;
+		} else {
+			return true;
+		}
+	};
+
+	const isFemaleName = (text) => {
+		const result = femaleNames.findIndex((femaleName) => {
+			return femaleName === text;
+		});
+		if (result === -1) {
+			return false;
+		} else {
+			return true;
+		}
+	};
 
 	return (
 		<div className="App App-header">
 			<div>Check Indian name!</div>
 
-			{isFetchingDone ? <Form parentCallback={callback} /> : <div>Fetching...</div>}
-
+			{isFetchingDone ? <Form parentCallback={processFullName} /> : <div>Fetching...</div>}
+			{displayedName === [] ? <div /> : <Explanation data={displayedName} />}
 		</div>
 	);
 }
