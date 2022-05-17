@@ -43,7 +43,6 @@ function App() {
 			const temp = { word: word, type: [] };
 			if (isSurname(word)) {
 				temp.type.push('surname');
-				console.log(temp.type);
 			}
 			if (isMaleName(word)) {
 				temp.type.push('male');
@@ -54,7 +53,8 @@ function App() {
 			results.push(temp);
 		});
 
-		displayedName = results
+		// displayedName = results
+		setDisplayedName(results)
 	};
 
 	const isSurname = (text) => {
